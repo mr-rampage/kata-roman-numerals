@@ -5,11 +5,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class RomanNumeralDictionary {
-	private final Map<Character, Integer> numeralDictionary = new HashMap<>();
-
-	public RomanNumeralDictionary() {
-		numeralDictionary.putAll(getRomanNumeralDictionary());
-	}
+	private Map<Character, Integer> cache;
 	
 	private Map<Character, Integer> getRomanNumeralDictionary() {
 		Map<Character, Integer> dictionary = new HashMap<>();
@@ -22,13 +18,20 @@ public class RomanNumeralDictionary {
 		dictionary.put('M', 1000);
 		return dictionary;
 	}
+	
+	private Map<Character, Integer> getDictionary() {
+		if (cache == null) {
+			cache = getRomanNumeralDictionary();
+		}
+		return cache;
+	}
 
 	public Integer get(Character symbol) {
-		return numeralDictionary.getOrDefault(symbol, 0);
+		return getDictionary().getOrDefault(symbol, 0);
 	}
 	
 	public String getSymbolString() {
-		return numeralDictionary.keySet().stream().map(c -> c.toString())
+		return getDictionary().keySet().stream().map(c -> c.toString())
 				.collect(Collectors.joining());
 	}
 }
