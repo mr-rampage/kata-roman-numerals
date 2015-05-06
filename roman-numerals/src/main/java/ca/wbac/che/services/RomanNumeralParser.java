@@ -1,9 +1,6 @@
 package ca.wbac.che.services;
 
-import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class RomanNumeralParser {
 
@@ -22,27 +19,9 @@ public class RomanNumeralParser {
 
 	public Integer valueOf(final String romanNumerals) {
 		if (isValidRomanNumeral.test(romanNumerals)) {
-			Stream<Integer> valueStream = adapter.toIntegerStream(romanNumerals);
-			return this.valueOf(valueStream);
+			return adapter.toInteger(romanNumerals);
 		}
 		return null;
-	}
-
-	private Integer valueOf(final Stream<Integer> valueStream) {
-		Integer total = 0;
-		Integer lastValue = 0;
-		
-		List<Integer> values = valueStream.collect(Collectors.toList());
-		
-		for (Integer value : values) {
-			if (lastValue < value) {
-				total -= 2 * lastValue;
-			}
-			total += value;
-			lastValue = value;
-		}
-		
-		return total;
 	}
 
 	private Predicate<String> createValidator(
