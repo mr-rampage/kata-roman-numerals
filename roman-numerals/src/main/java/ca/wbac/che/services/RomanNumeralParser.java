@@ -1,49 +1,37 @@
 package ca.wbac.che.services;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class RomanNumeralParser {
 
-	private final Map<Character, Integer> numeralDictionary = new HashMap<>();
+	private final RomanNumeralAdapter adapter;
 	final Predicate<String> isValidRomanNumeral;
+	final Predicate<Integer> canSubtract;
 
 	public RomanNumeralParser() {
-		numeralDictionary.putAll(getRomanNumeralDictionary());
-		isValidRomanNumeral = createValidator(numeralDictionary.keySet()
-				.stream());
+		RomanNumeralDictionary dictionary = new RomanNumeralDictionary();
+		String validCharacters = dictionary.getSymbolString();
+		
+		adapter = new RomanNumeralAdapter(dictionary);
+		isValidRomanNumeral = createValidator(validCharacters);
+		canSubtract = RuleFactory.isSpecialValue(1, 10, 100);
 	}
 
-	private Map<Character, Integer> getRomanNumeralDictionary() {
-		Map<Character, Integer> dictionary = new HashMap<>();
-		dictionary.put('I', 1);
-		dictionary.put('V', 5);
-		dictionary.put('X', 10);
-		dictionary.put('L', 50);
-		dictionary.put('C', 100);
-		dictionary.put('D', 500);
-		dictionary.put('M', 1000);
-		return dictionary;
-	}
-
-	public Integer valueOf(String romanNumerals) {
+	public Integer valueOf(final String romanNumerals) {
 		if (isValidRomanNumeral.test(romanNumerals)) {
-			return this.valueOf(romanNumerals, numeralDictionary);
+			Stream<Integer> valueStream = adapter.toIntegerStream(romanNumerals);
+			return this.valueOf(valueStream);
 		}
 		return null;
 	}
 
-	private Integer valueOf(final String romanNumerals,
-			final Map<Character, Integer> dictionary) {
+	private Integer valueOf(final Stream<Integer> valueStream) {
 		Integer total = 0;
 		Integer lastValue = 0;
-		Stream<Integer> valueStream = convertToIntegers(romanNumerals.chars(),
-				dictionary);
+		
 		List<Integer> values = valueStream.collect(Collectors.toList());
 		
 		for (Integer value : values) {
@@ -57,16 +45,8 @@ public class RomanNumeralParser {
 		return total;
 	}
 
-	private Stream<Integer> convertToIntegers(final IntStream symbolStream,
-			final Map<Character, Integer> dictionary) {
-		return symbolStream.mapToObj(c -> (char) c)
-				.map(symbol -> dictionary.getOrDefault(symbol, 0));
-	}
-
 	private Predicate<String> createValidator(
-			final Stream<Character> validSymbols) {
-		String validCharacters = validSymbols.map(c -> c.toString()).collect(
-				Collectors.joining());
+			final String validCharacters) {
 		Predicate<String> containsInvalidRepeat = RuleFactory
 				.hasRepeatingSymbols(4);
 		Predicate<String> containsValidCharactersOnly = RuleFactory
