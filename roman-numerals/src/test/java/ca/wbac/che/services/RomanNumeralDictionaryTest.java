@@ -5,27 +5,8 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 
-public class RomanNumeralParserTest {
-	RomanNumeralParser fixture = new RomanNumeralParser();
-	
-	@Test
-	public void shouldConvertITo1() {
-		Integer actual = fixture.valueOf("I");
-		assertThat(actual, is(1));
-	}
-	
-	@Test
-	public void shouldSumWhenNumbersSmaller() {
-		assertThat(fixture.valueOf("III"), is(3));
-		assertThat(fixture.valueOf("VIII"), is(8));
-	}
-	
-	@Test
-	public void shouldSubtractWhenNumbersLarger() {
-		assertThat(fixture.valueOf("IV"), is(4));
-		assertThat(fixture.valueOf("IX"), is(9));
-		
-	}
+public class RomanNumeralDictionaryTest {
+	RomanNumeralDictionary fixture = new RomanNumeralDictionary();
 	
 	@Test
 	public void shouldDisallowNonRomanNumerals() {

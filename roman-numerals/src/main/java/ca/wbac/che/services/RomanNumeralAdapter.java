@@ -1,36 +1,36 @@
 package ca.wbac.che.services;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.function.IntPredicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.stream.IntStream;
 
 public class RomanNumeralAdapter {
 
 	private final RomanNumeralDictionary dictionary;
-	
-	public RomanNumeralAdapter(RomanNumeralDictionary dictionary) {
+
+	public RomanNumeralAdapter(final RomanNumeralDictionary dictionary) {
 		this.dictionary = dictionary;
 	}
 
-	private Stream<Integer> toIntegerStream(final String romanNumerals) {
-		return romanNumerals.chars().mapToObj(c -> (char) c)
-				.map(dictionary::get);
-	}
-	
 	public Integer toInteger(final String romanNumerals) {
-		Integer total = 0;
-		Integer lastValue = 0;
-		Stream<Integer> valueStream = toIntegerStream(romanNumerals);
-		List<Integer> values = valueStream.collect(Collectors.toList());
-		
-		for (Integer value : values) {
-			if (lastValue < value) {
-				total -= 2 * lastValue;
-			}
-			total += value;
-			lastValue = value;
-		}
-		
-		return total;
+		return Optional.ofNullable(romanNumerals)
+				.filter(this.dictionary.isValidRomanNumeral)
+				.map(this::toIntegerList).map(this::toInteger).orElse(null);
 	}
+
+	private List<Integer> toIntegerList(final String romanNumerals) {
+		return romanNumerals.chars().mapToObj(c -> (char) c)
+				.map(dictionary::get).collect(Collectors.toList());
+	}
+
+	private Integer toInteger(final List<Integer> values) {
+		IntPredicate isSmallerThanNext = i -> values.get(i) < values.get(i + 1);
+		Integer total = values.stream().mapToInt(Integer::intValue).sum();
+		Integer subtraction = 2 * IntStream.range(0, values.size() - 1)
+				.filter(isSmallerThanNext).map(values::get).sum();
+		return total - subtraction;
+	}
+
 }

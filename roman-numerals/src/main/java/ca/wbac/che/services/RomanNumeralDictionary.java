@@ -2,11 +2,16 @@ package ca.wbac.che.services;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 public class RomanNumeralDictionary {
-	private Map<Character, Integer> cache;
-	
+	private final String REGEX_VALID_ROMAN_NUMERAL = "^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$";
+	private final Map<Character, Integer> dictionary = getRomanNumeralDictionary();
+
+	public final Predicate<String> isValidRomanNumeral = Pattern.compile(
+			REGEX_VALID_ROMAN_NUMERAL).asPredicate();
+
 	private Map<Character, Integer> getRomanNumeralDictionary() {
 		Map<Character, Integer> dictionary = new HashMap<>();
 		dictionary.put('I', 1);
@@ -18,20 +23,8 @@ public class RomanNumeralDictionary {
 		dictionary.put('M', 1000);
 		return dictionary;
 	}
-	
-	private Map<Character, Integer> getDictionary() {
-		if (cache == null) {
-			cache = getRomanNumeralDictionary();
-		}
-		return cache;
-	}
 
-	public Integer get(Character symbol) {
-		return getDictionary().getOrDefault(symbol, 0);
-	}
-	
-	public String getSymbolString() {
-		return getDictionary().keySet().stream().map(c -> c.toString())
-				.collect(Collectors.joining());
+	public Integer get(final Character symbol) {
+		return dictionary.getOrDefault(symbol, 0);
 	}
 }
